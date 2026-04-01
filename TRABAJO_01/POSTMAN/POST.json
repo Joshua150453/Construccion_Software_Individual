@@ -1,0 +1,12 @@
+-- Para revisar que se procesan datos Udar: http://127.0.0.1:5000/users
+
+.. Y utilizar:
+{
+    "name": "Andrés",
+    "lastname": "García",
+    "address": {
+        "city": "Lima",
+        "country": "Perú",
+        "postal_code": "15001"
+    }
+}
