@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>CRUD Usuarios - Vanilla JS</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; background-color: #f8f9fa; }
+        .container { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h2 { color: #333; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+        input { padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
+        button { padding: 10px; background: #28a745; color: white; border: none; cursor: pointer; border-radius: 4px; }
+        button:hover { background: #218838; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 12px; border: 1px solid #ddd; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .btn-del { background: #dc3545; padding: 5px 10px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Registro de Usuarios</h2>
+    <form id="userForm">
+        <div class="form-grid">
+            <input type="text" id="name" placeholder="Nombre" required>
+            <input type="text" id="lastname" placeholder="Apellido" required>
+            <input type="text" id="city" placeholder="Ciudad">
+            <input type="text" id="country" placeholder="País">
+            <input type="text" id="zip" placeholder="Código Postal">
+        </div>
+        <button type="submit">Crear Usuario</button>
+    </form>
+
+    <h2>Usuarios en el Sistema</h2>
+    <table id="userTable">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Apellido</th>
+                <th>Dirección (Ciudad, País, CP)</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+
+<script>
+    const URL = "http://127.0.0.1:5000/users";
+
+    // Función para listar (READ)
+    async function cargarUsuarios() {
+        const res = await fetch(URL);
+        const data = await res.json();
+        const tabla = document.querySelector("#userTable tbody");
+        tabla.innerHTML = "";
+        
+        data.forEach(user => {
+            tabla.innerHTML += `
+                <tr>
+                    <td>${user.id}</td>
+                    <td>${user.name}</td>
+                    <td>${user.lastname}</td>
+                    <td>${user.address.city}, ${user.address.country} (${user.address.postal_code})</td>
+                    <td><button class="btn-del" onclick="eliminarUsuario(${user.id})">Borrar</button></td>
+                </tr>
+            `;
+        });
+    }
+
+    // Función para crear (CREATE)
+    document.getElementById("userForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const userObj = {
+            name: document.getElementById("name").value,
+            lastname: document.getElementById("lastname").value,
+            address: {
+                city: document.getElementById("city").value,
+                country: document.getElementById("country").value,
+                postal_code: document.getElementById("zip").value
+            }
+        };
+
+        await fetch(URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(userObj)
+        });
+
+        e.target.reset();
+        cargarUsuarios();
+    });
+
+    // Función para borrar (DELETE)
+    async function eliminarUsuario(id) {
+        await fetch(`${URL}/${id}`, { method: "DELETE" });
+        cargarUsuarios();
+    }
+
+    // Carga inicial al abrir la página
+    cargarUsuarios();
+</script>
+
+</body>
+</html>
